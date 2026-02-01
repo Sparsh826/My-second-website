@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AnimDesk</title>
+
+  <style>
+    :root{
+      --sky:#bfefff;
+      --sky2:#e9fbff;
+      --sea:#97d8ff;
+      --ink:#23313a;
+      --glass: rgba(255,255,255,.62);
+      --glass2: rgba(255,255,255,.22);
+      --shadow: 0 18px 50px rgba(0,0,0,.18);
+      --shadow2: 0 10px 25px rgba(0,0,0,.14);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink)}
+    body{
+      overflow:hidden;
+      background:
+        radial-gradient(1200px 500px at 50% 0%, var(--sky2), transparent 60%),
+        linear-gradient(180deg, var(--sky), var(--sea));
+    }
+
+    .wrap{height:100%; padding:22px;}
+    .frame{
+      height:100%;
+      border-radius:26px;
+      background: linear-gradient(180deg, rgba(255,255,255,.66), rgba(255,255,255,.22));
+      border: 6px solid rgba(0,140,255,.22);
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .window{
+      position:absolute;
+      left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      width:min(900px, calc(100% - 44px));
+      border-radius:22px;
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      border: 1px solid rgba(0,0,0,.08);
+    }
+
+    .titlebar{
+      height:46px;
+      display:flex;
+      align-items:center;
+      padding:0 14px;
+      background: rgba(0,0,0,.08);
+      backdrop-filter: blur(6px);
+    }
+
+    .dots{display:flex; gap:8px; margin-right:12px;}
+    .dot{width:10px;height:10px;border-radius:50%;}
+    .dot.red{background:#ff5f57}
+    .dot.yellow{background:#febc2e}
+    .dot.green{background:#28c840}
+    .tab{font-size:13px;color:rgba(0,0,0,.65);font-weight:650;}
+
+    .content{
+      padding:34px 24px 18px;
+      min-height: 430px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      gap:14px;
+      position:relative;
+    }
+
+    /* splash */
+    .splash{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      flex-direction:column; gap:10px;
+      background: rgba(255,255,255,.92);
+      z-index: 5;
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    .splash.hide{opacity:0; transform: scale(1.02); pointer-events:none;}
+    .logo{
+      font-size:56px;
+      line-height:1;
+      letter-spacing:-1.2px;
+      font-weight:900;
+      color: #ff9b00;
+      cursor:pointer;
+      user-select:none;
+      transform-origin:center;
+    }
+    .logo.pop{animation: pop .55s ease both;}
+    @keyframes pop{ 0%{transform:scale(1)} 40%{transform:scale(1.08)} 100%{transform:scale(.98)} }
+    .sub{font-size:14px;color:rgba(0,0,0,.55);}
+    .by{position:absolute; bottom:14px;font-size:12px;color:rgba(0,0,0,.55);}
+    .by b{color:rgba(0,0,0,.75)}
+
+    /* stickers */
+    .sticker{
+      position:absolute;
+      width:86px; height:86px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(0,0,0,.07);
+      box-shadow: 0 10px 18px rgba(0,0,0,.10);
+      display:flex; align-items:center; justify-content:center;
+      user-select:none;
+      animation: floaty 6s ease-in-out infinite;
+      backdrop-filter: blur(6px);
+      overflow:hidden;
+    }
+    .sticker img{
+      width:100%;
+      height:100%;
+      object-fit: contain;
+      padding: 8px;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.10));
+    }
+    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    .s1{left:18px; top:84px; animation-delay:.0s}
+    .s2{right:18px; top:84px; animation-delay:.8s}
+    .s3{left:30px; bottom:86px; animation-delay:1.2s}
+    .s4{right:28px; bottom:86px; animation-delay:.4s}
+    .s5{left:50%; top:56px; transform:translateX(-50%); animation-delay:1.6s}
+
+    /* search */
+    .searchWrap{width:min(560px, 94%); position:relative; margin-top:12px;}
+    .search{
+      width:100%;
+      padding:16px 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(0,0,0,.10);
+      background: linear-gradient(180deg, var(--glass), var(--glass2));
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 20px rgba(0,0,0,.08);
+      font-size:16px;
+      outline:none;
+      color: var(--ink);
+    }
+    .metaRow{
+      margin-top:8px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:13px;
+      color:rgba(0,0,0,.55);
+      width:100%;
+    }
+
+    /* suggestions */
+    .suggest{
+      position:absolute;
+      left:0; right:0;
+      top:56px;
+      background: rgba(255,255,255,.98);
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow: 0 16px 35px rgba(0,0,0,.14);
+      display:none;
+      z-index: 3;
+
+      /* ✅ scrollable list */
+      max-height: 52vh;
+      overflow-y:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .suggest.show{display:block}
+    .suggest button{
+      width:100%;
+      text-align:left;
+      padding:12px 14px;
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .suggest button:hover{background: rgba(0,0,0,.04);}
+
+    .thumb{
+      width:52px;height:52px;border-radius:14px;
+      background: rgba(0,0,0,.06);
+      overflow:hidden; flex:0 0 auto;
+      border:1px solid rgba(0,0,0,.06);
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover}
+
+    .sText{display:flex;flex-direction:column;gap:2px; min-width:0;}
+    .sTitle{
+      font-size:14.5px;
+      font-weight:900;
+      color:rgba(0,0,0,.82);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .sSub{font-size:12.5px;color:rgba(0,0,0,.55);display:flex;gap:8px;flex-wrap:wrap;}
+
+    /* result card */
+    .result{
+      width:min(720px, 94%);
+      margin-top: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 12px 26px rgba(0,0,0,.12);
+      padding: 14px 16px;
+      display:none;
+    }
+    .result.show{display:block}
+    .rRow{display:flex;gap:14px;align-items:flex-start;}
+    .poster{
+      width:92px; height:92px;
+      border-radius:16px;
+      overflow:hidden;
+      background: rgba(0,0,0,.06);
+      border: 1px solid rgba(0,0,0,.06);
+      flex:0 0 auto;
+    }
+    .poster img{width:100%;height:100%;object-fit:cover}
+    .rBody{min-width:0}
+    .resultTitle{font-weight:950;margin:0 0 6px;}
+    .resultText{margin:0;color:rgba(0,0,0,.68);line-height:1.5;font-size:14px;}
+    .rLinks{margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;}
+    .btn{
+      display:inline-block;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.85);
+      color: rgba(0,0,0,.78);
+      text-decoration:none;
+      font-weight:900;
+      font-size:13px;
+    }
+    .btn.primary{background: rgba(255,155,0,.16);border-color: rgba(255,155,0,.30);color:#7a4700;}
+
+    @media (max-width:520px){
+      .logo{font-size:44px}
+      .sticker{width:70px;height:70px}
+      .titlebar{height:42px}
+      .content{padding:28px 16px 18px}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="frame">
+
+      <div class="window">
+        <div class="titlebar">
+          <div class="dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="tab">home</div>
+        </div>
+
+        <div class="content">
+          <!-- ✅ Stickers: CHANGE these filenames to match EXACTLY your files -->
+          <div class="sticker s1"><img src="a3.png"  alt="sticker" onerror="this.style.display='none'"></div>
+          <div class="sticker s2"><img src="a7.jpeg" alt="sticker" onerror="this.style.display='none'"></div>
+          <div class="sticker s3"><img src="a6.png"  alt="sticker" onerror="this.style.display='none'"></div>
+          <div class="sticker s4"><img src="a9.jpeg" alt="sticker" onerror="this.style.display='none'"></div>
+          <div class="sticker s5"><img src="a12.jpeg" alt="sticker" onerror="this.style.display='none'"></div>
+
+          <div class="splash" id="splash">
+            <div class="logo" id="logo">AnimDesk</div>
+            <div class="sub">click the logo to enter ✨</div>
+            <div class="by">AnimDesk <b>by Sparsh</b></div>
+          </div>
+
+          <div class="searchWrap">
+            <input class="search" id="search"
+              placeholder="Search anime characters… (Doraemon, Pikachu, Nobita)"
+              autocomplete="off"
+              disabled
+            />
+            <div class="suggest" id="suggest"></div>
+
+            <div class="metaRow">
+              <div id="status">Ready.</div>
+              <div>Data: Jikan Characters</div>
+            </div>
+          </div>
+
+          <div class="result" id="result">
+            <div class="rRow">
+              <div class="poster" id="poster"></div>
+              <div class="rBody">
+                <p class="resultTitle" id="resultTitle">Result</p>
+                <p class="resultText" id="resultText"></p>
+                <div class="rLinks" id="rLinks"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ✅ Character Search API:
+    // https://api.jikan.moe/v4/characters?q=QUERY&limit=10
+
+    const splash = document.getElementById('splash');
+    const logo = document.getElementById('logo');
+    const search = document.getElementById('search');
+    const suggest = document.getElementById('suggest');
+    const result = document.getElementById('result');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultText = document.getElementById('resultText');
+    const statusEl = document.getElementById('status');
+    const poster = document.getElementById('poster');
+    const rLinks = document.getElementById('rLinks');
+
+    let lastResults = [];
+    let debounceTimer = null;
+    let aborter = null;
+
+    function enterAnimDesk(){
+      logo.classList.add('pop');
+      setTimeout(() => {
+        splash.classList.add('hide');
+        search.disabled = false;
+        search.focus();
+      }, 420);
+    }
+    logo.addEventListener('click', enterAnimDesk);
+    setTimeout(() => { if(!splash.classList.contains('hide')) enterAnimDesk(); }, 1200);
+
+    function setStatus(msg){ statusEl.textContent = msg; }
+
+    function showResult(item){
+      const name = item.name || "Character";
+      const about = (item.about || "").replace(/<[^>]*>/g,"").trim();
+
+      resultTitle.textContent = name;
+      resultText.textContent = about ? (about.length > 260 ? about.slice(0,260).trim()+"…" : about)
+                                    : "No description found. Try another character.";
+
+      // image
+      poster.innerHTML = "";
+      const imgUrl = item.images?.jpg?.image_url || "";
+      if(imgUrl){
+        const img = document.createElement('img');
+        img.src = imgUrl;
+        img.alt = name;
+        poster.appendChild(img);
+      }
+
+      // links
+      rLinks.innerHTML = "";
+      if(item.url){
+        const a = document.createElement('a');
+        a.className = "btn primary";
+        a.href = item.url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "Open on MyAnimeList →";
+        rLinks.appendChild(a);
+      }
+
+      const b = document.createElement('a');
+      b.className = "btn";
+      b.href = "#";
+      b.textContent = "Clear";
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
+        result.classList.remove('show');
+        search.value = "";
+        suggest.classList.remove('show');
+        setStatus("Ready.");
+        search.focus();
+      });
+      rLinks.appendChild(b);
+
+      result.classList.add('show');
+    }
+
+    function renderSuggestions(items){
+      suggest.innerHTML = "";
+      if(!items || items.length === 0){
+        suggest.classList.remove('show');
+        return;
+      }
+
+      items.slice(0,10).forEach((item) => {
+        const btn = document.createElement('button');
+        btn.type = "button";
+
+        const thumbUrl = item.images?.jpg?.image_url || "";
+        const name = item.name || "Character";
+        const nick = (item.name_kanji || item.nicknames?.[0] || "");
+
+        btn.innerHTML = `
+          <div class="thumb">${thumbUrl ? `<img src="${thumbUrl}" alt="">` : ""}</div>
+          <div class="sText">
+            <div class="sTitle">${name}</div>
+            <div class="sSub">${nick ? `<span>${nick}</span>` : `<span>Character</span>`}</div>
+          </div>
+        `;
+
+        btn.addEventListener('click', () => {
+          search.value = name;
+          suggest.classList.remove('show');
+          setStatus("Showing: " + name);
+          showResult(item);
+        });
+
+        suggest.appendChild(btn);
+      });
+
+      suggest.classList.add('show');
+    }
+
+    async function apiSearch(q){
+      if(aborter) aborter.abort();
+      aborter = new AbortController();
+
+      const url = `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(q)}&limit=10`;
+
+      setStatus("Searching characters…");
+      try{
+        const res = await fetch(url, { signal: aborter.signal });
+        if(!res.ok) throw new Error("API error " + res.status);
+        const data = await res.json();
+        lastResults = data?.data || [];
+        renderSuggestions(lastResults);
+        setStatus(lastResults.length ? "Suggestions ready." : "No characters found.");
+      }catch(err){
+        if(err.name === "AbortError") return;
+        setStatus("Rate limit / error. Try again in a moment.");
+        renderSuggestions([]);
+      }
+    }
+
+    function onInput(){
+      const q = search.value.trim();
+      result.classList.remove('show');
+
+      if(q.length < 2){
+        renderSuggestions([]);
+        setStatus("Type 2+ letters…");
+        return;
+      }
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => apiSearch(q), 320);
+    }
+
+    search.addEventListener('input', onInput);
+
+    search.addEventListener('keydown', (e) => {
+      if(e.key === "Enter"){
+        const q = search.value.trim().toLowerCase();
+        if(!q) return;
+        let pick = lastResults.find(x => (x.name || "").toLowerCase() === q) || lastResults[0];
+        if(pick){
+          suggest.classList.remove('show');
+          setStatus("Showing: " + (pick.name || "Result"));
+          showResult(pick);
+        }else{
+          apiSearch(search.value.trim());
+        }
+      }
+      if(e.key === "Escape"){
+        suggest.classList.remove('show');
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if(!e.target.closest('.searchWrap')) suggest.classList.remove('show');
+    });
+  </script>
+</body>
+</html>
