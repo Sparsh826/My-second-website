@@ -7,40 +7,29 @@
 
   <style>
     :root{
-      --bg1:#d7f2ff;
-      --bg2:#bfe8ff;
-      --card:#ffffffcc;
-      --glass:#ffffffb8;
-      --text:#1b1b1b;
-      --muted:#666;
+      --bg1:#d7f2ff; --bg2:#bfe8ff;
+      --card:#ffffffcc; --glass:#ffffffc9;
+      --text:#1b1b1b; --muted:#666;
       --shadow: 0 18px 45px rgba(0,0,0,.12);
       --radius:18px;
 
-      /* Safe zones so stickers never overlap UI */
-      --safeTop: 130px;     /* logo area */
-      --safeMid: 210px;     /* search+results area height */
-      --safeBottom: 110px;  /* bottom padding */
+      /* Safe zones so stickers never overlap logo/search/results */
+      --safeTop: 90px;
+      --safeBottom: 90px;
     }
-
     *{box-sizing:border-box}
     body{
-      margin:0;
-      min-height:100vh;
+      margin:0; min-height:100vh;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
       background: linear-gradient(180deg,var(--bg1),var(--bg2));
       overflow-x:hidden;
     }
-
-    /* Subtle pattern */
     body::before{
-      content:"";
-      position:fixed; inset:0;
-      background-image:
-        radial-gradient(rgba(255,255,255,.35) 1px, transparent 1px);
+      content:""; position:fixed; inset:0;
+      background-image: radial-gradient(rgba(255,255,255,.35) 1px, transparent 1px);
       background-size: 34px 34px;
-      opacity:.18;
-      pointer-events:none;
+      opacity:.18; pointer-events:none;
     }
 
     .wrap{
@@ -48,11 +37,10 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding: 32px 18px;
+      padding: 28px 16px;
       position:relative;
     }
 
-    /* Desktop-ish window */
     .window{
       width:min(980px, 96vw);
       height:min(560px, 82vh);
@@ -80,121 +68,81 @@
     .dot.red{background:#ff5f57}
     .dot.yellow{background:#febc2e}
     .dot.green{background:#28c840}
-    .tabname{
-      font-size:14px;
-      color:#333;
-      opacity:.8;
-      margin-left:6px;
-    }
+    .tabname{font-size:14px; color:#333; opacity:.8; margin-left:6px;}
 
     .stage{
       position:relative;
       height: calc(100% - 44px);
-      padding: 18px;
+      padding: 16px;
     }
 
-    /* Logo splash */
-    .splash{
+    /* LOGO always visible */
+    .brand{
       position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background: rgba(255,255,255,.55);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      z-index:20;
-      transition: opacity .35s ease, transform .35s ease;
-    }
-    .splash.hidden{
-      opacity:0;
-      transform: scale(.98);
+      left:50%;
+      top: 14px;
+      transform: translateX(-50%);
+      z-index: 30; /* above stickers */
+      text-align:center;
+      user-select:none;
       pointer-events:none;
     }
-    .logoBox{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:8px;
-      user-select:none;
-      cursor:pointer;
-      padding: 18px 20px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.75);
-      border:1px solid rgba(0,0,0,.08);
-      box-shadow: 0 14px 35px rgba(0,0,0,.14);
-    }
-    .logo{
-      font-weight: 900;
+    .brand .logo{
+      font-weight: 950;
       letter-spacing: 2px;
-      font-size: 44px;
+      font-size: 34px;
       line-height:1;
     }
-    .by{
-      font-size: 14px;
-      color: var(--muted);
-      letter-spacing: .5px;
-    }
-    .tap{
+    .brand .by{
       font-size: 12px;
       color: var(--muted);
-      opacity:.9;
-      margin-top:4px;
+      margin-top: 4px;
+      letter-spacing: .4px;
     }
 
-    /* Main center card */
+    /* Center search card */
     .center{
       position:absolute;
       left:50%;
-      top: 54%;
+      top: 55%;
       transform: translate(-50%,-50%);
-      width:min(720px, 92%);
+      width:min(760px, 92%);
       background: var(--glass);
       border:1px solid rgba(0,0,0,.08);
       border-radius: 18px;
       box-shadow: 0 18px 45px rgba(0,0,0,.12);
       padding: 16px;
-      z-index:10;
+      z-index: 20; /* above stickers */
     }
 
-    .searchRow{
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-
-    .search{
-      flex:1;
-      position:relative;
-    }
+    .searchRow{display:flex; gap:12px; align-items:center;}
+    .search{flex:1; position:relative;}
     input{
       width:100%;
       padding: 13px 14px 13px 42px;
       border-radius: 14px;
       border:1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.9);
+      background: rgba(255,255,255,.95);
       outline:none;
       font-size:15px;
     }
     .icon{
-      position:absolute;
-      left:12px;
-      top:50%;
+      position:absolute; left:12px; top:50%;
       transform: translateY(-50%);
-      opacity:.7;
-      font-size:16px;
+      opacity:.7; font-size:16px;
     }
     .btn{
       padding: 12px 14px;
       border-radius: 14px;
       border:1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.9);
+      background: rgba(255,255,255,.95);
       cursor:pointer;
-      font-weight:650;
+      font-weight:750;
       font-size:14px;
+      white-space:nowrap;
     }
 
-    /* Dropdown suggestions */
+    /* Suggestions (ANIME TITLES) */
     .suggest{
       position:absolute;
       top: 48px;
@@ -206,7 +154,9 @@
       overflow:hidden;
       display:none;
       z-index: 50;
-      max-height: 220px;
+      max-height: 240px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
     }
     .suggest.open{display:block}
     .sItem{
@@ -214,9 +164,13 @@
       border-bottom: 1px solid rgba(0,0,0,.06);
       cursor:pointer;
       font-size:14px;
+      display:flex;
+      gap:10px;
+      align-items:center;
     }
     .sItem:last-child{border-bottom:none}
     .sItem:hover{background: rgba(0,0,0,.04)}
+    .sThumb{width:34px;height:34px;border-radius:9px;object-fit:cover;background:#eee;flex:0 0 auto}
     .sSmall{font-size:12px;color:var(--muted);margin-top:2px}
 
     .meta{
@@ -225,16 +179,17 @@
       margin-top:10px;
       font-size:12px;
       color:var(--muted);
+      gap:10px;
     }
 
-    /* Scrollable results */
+    /* Results (CHARACTERS ONLY) */
     .results{
       margin-top: 12px;
       border-radius: 14px;
-      background: rgba(255,255,255,.9);
+      background: rgba(255,255,255,.95);
       border:1px solid rgba(0,0,0,.08);
-      max-height: 280px;
-      overflow:auto;             /* ✅ scrollbar */
+      max-height: 290px;
+      overflow:auto;               /* ✅ scrollbar */
       -webkit-overflow-scrolling: touch;
     }
     .rHead{
@@ -245,6 +200,9 @@
       display:flex;
       justify-content:space-between;
       gap:10px;
+      position:sticky; top:0;
+      background: rgba(255,255,255,.98);
+      z-index:2;
     }
     .rItem{
       display:flex;
@@ -256,21 +214,11 @@
     .rItem:last-child{border-bottom:none}
     .thumb{
       width:42px;height:42px;border-radius:10px;
-      object-fit:cover;
-      background:#eee;
+      object-fit:cover; background:#eee;
       flex:0 0 auto;
     }
-    .rTitle{
-      font-weight:750;
-      font-size:14px;
-      line-height:1.2;
-    }
-    .rSub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:2px;
-      line-height:1.2;
-    }
+    .rTitle{font-weight:800;font-size:14px;line-height:1.2;}
+    .rSub{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.2;}
     .badge{
       font-size:11px;
       padding:4px 8px;
@@ -281,39 +229,38 @@
       color:#333;
     }
 
-    /* Stickers (never in center) */
+    /* Stickers never on top of center/brand */
     .sticker{
       position:absolute;
-      width:72px;
-      height:72px;
+      width:72px; height:72px;
       object-fit:contain;
       filter: drop-shadow(0 10px 12px rgba(0,0,0,.15));
       opacity:.96;
       pointer-events:none;
-      z-index:5;
+      z-index: 5; /* below UI */
     }
 
-    /* Place stickers around safe zones */
-    .s1{left:22px; top: calc(var(--safeTop) + 40px);}
-    .s2{right:22px; top: calc(var(--safeTop) + 40px);}
-    .s3{left:40px; bottom: calc(var(--safeBottom) + 18px);}
-    .s4{right:40px; bottom: calc(var(--safeBottom) + 18px);}
-    .s5{left:110px; top: calc(var(--safeTop) + 160px);}
-    .s6{right:110px; top: calc(var(--safeTop) + 160px);}
+    /* Positions (outside safe center area) */
+    .s1{left:18px; top: calc(var(--safeTop) + 40px);}
+    .s2{right:18px; top: calc(var(--safeTop) + 40px);}
+    .s3{left:34px; bottom: calc(var(--safeBottom) + 16px);}
+    .s4{right:34px; bottom: calc(var(--safeBottom) + 16px);}
+    .s5{left:110px; top: calc(var(--safeTop) + 170px);}
+    .s6{right:110px; top: calc(var(--safeTop) + 170px);}
 
-    /* Small screens: reduce sticker size */
     @media (max-width: 520px){
-      .window{height:min(640px, 86vh);}
+      .window{height:min(660px, 86vh);}
       .sticker{width:58px;height:58px}
       .center{top: 58%}
-      .results{max-height: 320px}
+      .results{max-height: 340px}
+      .brand .logo{font-size:30px}
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="window" aria-label="Animdesk window">
+    <div class="window">
       <div class="titlebar">
         <div class="dots">
           <div class="dot red"></div>
@@ -325,7 +272,13 @@
 
       <div class="stage">
 
-        <!-- Stickers: update filenames to your real ones -->
+        <!-- Brand -->
+        <div class="brand">
+          <div class="logo">ANIMDESK</div>
+          <div class="by">by sparsh</div>
+        </div>
+
+        <!-- Stickers (make sure these exact names exist in your repo folder) -->
         <img class="sticker s1" src="a3.png" alt="">
         <img class="sticker s2" src="a7.jpeg" alt="">
         <img class="sticker s3" src="a6.png" alt="">
@@ -333,21 +286,12 @@
         <img class="sticker s5" src="a11.jpeg" alt="">
         <img class="sticker s6" src="a4.png" alt="">
 
-        <!-- Splash logo -->
-        <div class="splash" id="splash">
-          <div class="logoBox" id="logoBtn" title="Tap to start">
-            <div class="logo">ANIMDESK</div>
-            <div class="by">by sparsh</div>
-            <div class="tap">tap to open ✨</div>
-          </div>
-        </div>
-
-        <!-- Main card -->
-        <div class="center" aria-label="Search panel">
+        <!-- Center search -->
+        <div class="center">
           <div class="searchRow">
             <div class="search">
               <div class="icon">🔎</div>
-              <input id="q" type="text" placeholder="Search anime character… (ex: Doraemon, Naruto, Gojo)" autocomplete="off" />
+              <input id="q" type="text" placeholder="Search an anime… (ex: Jujutsu Kaisen, Pokemon, Doraemon)" autocomplete="off" />
               <div class="suggest" id="suggest"></div>
             </div>
             <button class="btn" id="goBtn">Search</button>
@@ -355,12 +299,12 @@
 
           <div class="meta">
             <div id="metaLeft">Type 2+ letters…</div>
-            <div id="metaRight">Data: Jikan API</div>
+            <div id="metaRight">Step 1: pick anime → Step 2: see characters</div>
           </div>
 
-          <div class="results" id="results" aria-label="Results">
+          <div class="results" id="results">
             <div class="rHead">
-              <span>Results</span>
+              <span id="rTitle">Characters</span>
               <span id="count">0</span>
             </div>
             <div id="list"></div>
@@ -372,90 +316,29 @@
   </div>
 
 <script>
-  // ---------- UI: splash ----------
-  const splash = document.getElementById('splash');
-  const logoBtn = document.getElementById('logoBtn');
-  logoBtn.addEventListener('click', () => splash.classList.add('hidden'));
+  const qInput = document.getElementById('q');
+  const goBtn = document.getElementById('goBtn');
+  const suggestBox = document.getElementById('suggest');
+  const list = document.getElementById('list');
+  const count = document.getElementById('count');
+  const metaLeft = document.getElementById('metaLeft');
+  const rTitle = document.getElementById('rTitle');
 
-  // ---------- Helpers ----------
-  const $ = (id) => document.getElementById(id);
+  // quick typo fixes (helps exactly your "jujitsu" case)
+  const aliasFix = [
+    [/\bjujitsu\b/gi, "jujutsu"],
+    [/\bkaysen\b/gi, "kaisen"],
+    [/\bpokémon\b/gi, "pokemon"],
+  ];
+  function normalizeQuery(s){
+    let out = (s||"").trim();
+    aliasFix.forEach(([re,rep]) => out = out.replace(re, rep));
+    return out.trim();
+  }
 
   function esc(s){ return (s||"").toString().replace(/[&<>"']/g, m => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   }[m])); }
-
-  // Simple fuzzy score (typo tolerance)
-  function scoreMatch(query, text){
-    query = query.toLowerCase();
-    text = (text||"").toLowerCase();
-    if(!query || !text) return 0;
-    if(text.includes(query)) return 100 - (text.indexOf(query)); // strong
-    // subsequence score
-    let qi=0, ti=0, hits=0;
-    while(qi<query.length && ti<text.length){
-      if(query[qi]===text[ti]){ hits++; qi++; }
-      ti++;
-    }
-    return Math.round((hits / query.length) * 60); // up to 60
-  }
-
-  // ---------- Rendering ----------
-  const list = $('list');
-  const count = $('count');
-  const metaLeft = $('metaLeft');
-
-  function setResults(items, label){
-    list.innerHTML = "";
-    count.textContent = items.length;
-    metaLeft.textContent = label || (items.length ? "Showing matches…" : "No results. Try another name.");
-    items.forEach(it => {
-      const div = document.createElement('div');
-      div.className = 'rItem';
-      const img = it.image || "";
-      div.innerHTML = `
-        <img class="thumb" src="${esc(img)}" alt="" onerror="this.style.display='none'">
-        <div>
-          <div class="rTitle">${esc(it.title)}</div>
-          <div class="rSub">${esc(it.sub || "")}</div>
-        </div>
-        <div class="badge">${esc(it.type)}</div>
-      `;
-      list.appendChild(div);
-    });
-  }
-
-  // ---------- API (Jikan) ----------
-  // 1) Characters search
-  async function fetchCharacters(q){
-    const url = `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(q)}&limit=10&order_by=favorites&sort=desc`;
-    const r = await fetch(url);
-    const j = await r.json();
-    const data = (j && j.data) ? j.data : [];
-    return data.map(c => ({
-      type: "Character",
-      title: c.name,
-      sub: (c.about ? c.about.slice(0, 90).replace(/\s+/g,' ').trim() + "…" : "Popular character"),
-      image: c.images?.jpg?.image_url || ""
-    }));
-  }
-
-  // 2) Fallback: Anime search (helps when user searches anime title like "Jujutsu Kaisen")
-  async function fetchAnime(q){
-    const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=10&order_by=score&sort=desc`;
-    const r = await fetch(url);
-    const j = await r.json();
-    const data = (j && j.data) ? j.data : [];
-    return data.map(a => ({
-      type: "Anime",
-      title: a.title,
-      sub: `Score: ${a.score ?? "NA"} • ${a.type ?? ""}`,
-      image: a.images?.jpg?.image_url || ""
-    }));
-  }
-
-  // Suggestions: use characters first, fuzzy filter
-  const suggestBox = $('suggest');
-  let lastSuggest = [];
 
   function openSuggest(items){
     if(!items.length){
@@ -464,30 +347,70 @@
       return;
     }
     suggestBox.innerHTML = items.map(x => `
-      <div class="sItem" data-val="${esc(x.title)}">
-        <div><b>${esc(x.title)}</b></div>
-        <div class="sSmall">${esc(x.type)} • ${esc(x.sub||"")}</div>
+      <div class="sItem" data-id="${x.id}" data-title="${esc(x.title)}">
+        <img class="sThumb" src="${esc(x.image||"")}" alt="" onerror="this.style.display='none'">
+        <div>
+          <div><b>${esc(x.title)}</b></div>
+          <div class="sSmall">${esc(x.sub||"")}</div>
+        </div>
       </div>
     `).join("");
     suggestBox.classList.add('open');
   }
 
-  suggestBox.addEventListener('click', (e) => {
-    const item = e.target.closest('.sItem');
-    if(!item) return;
-    $('q').value = item.getAttribute('data-val');
-    suggestBox.classList.remove('open');
-    doSearch();
-  });
+  function setCharacterResults(animeTitle, chars){
+    rTitle.textContent = animeTitle ? `Characters — ${animeTitle}` : "Characters";
+    list.innerHTML = "";
+    count.textContent = chars.length;
 
-  // ---------- Search flow ----------
-  const qInput = $('q');
-  const goBtn = $('goBtn');
+    chars.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'rItem';
+      div.innerHTML = `
+        <img class="thumb" src="${esc(c.image||"")}" alt="" onerror="this.style.display='none'">
+        <div>
+          <div class="rTitle">${esc(c.name)}</div>
+          <div class="rSub">${esc(c.role || "Character")}</div>
+        </div>
+        <div class="badge">Character</div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  // Step 1: Search ANIME titles (for suggestions)
+  async function fetchAnimeTitles(q){
+    const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=8&order_by=popularity&sort=asc`;
+    const r = await fetch(url);
+    const j = await r.json();
+    const data = (j && j.data) ? j.data : [];
+    return data.map(a => ({
+      id: a.mal_id,
+      title: a.title,
+      sub: `${a.type || "Anime"} • Score: ${a.score ?? "NA"}`,
+      image: a.images?.jpg?.image_url || ""
+    }));
+  }
+
+  // Step 2: Once anime picked → fetch CHARACTERS of that anime
+  async function fetchAnimeCharacters(animeId){
+    const url = `https://api.jikan.moe/v4/anime/${animeId}/characters`;
+    const r = await fetch(url);
+    const j = await r.json();
+    const data = (j && j.data) ? j.data : [];
+    return data.slice(0, 60).map(x => ({
+      name: x.character?.name || "Unknown",
+      role: x.role || "Character",
+      image: x.character?.images?.jpg?.image_url || ""
+    }));
+  }
 
   let typingTimer = null;
-
   async function doSuggest(){
-    const q = qInput.value.trim();
+    const raw = qInput.value;
+    const q = normalizeQuery(raw);
+    if(q !== raw) qInput.value = q;
+
     if(q.length < 2){
       openSuggest([]);
       metaLeft.textContent = "Type 2+ letters…";
@@ -495,62 +418,48 @@
     }
 
     try{
-      const chars = await fetchCharacters(q);
-      // Fuzzy rank inside returned list
-      const ranked = chars
-        .map(it => ({...it, _s: scoreMatch(q, it.title)}))
-        .sort((a,b) => b._s - a._s)
-        .slice(0,6);
-
-      lastSuggest = ranked;
-      openSuggest(ranked);
-      metaLeft.textContent = "Suggestions ready…";
-    }catch(err){
+      metaLeft.textContent = "Searching anime titles…";
+      const an = await fetchAnimeTitles(q);
+      openSuggest(an);
+      metaLeft.textContent = an.length ? "Pick an anime from the list 👇" : "No anime found. Try another spelling.";
+    }catch(e){
       openSuggest([]);
-      metaLeft.textContent = "API busy… try again in a few seconds.";
+      metaLeft.textContent = "API busy. Wait 10 sec and try again.";
     }
   }
 
-  async function doSearch(){
-    const q = qInput.value.trim();
+  async function loadCharacters(animeId, animeTitle){
     suggestBox.classList.remove('open');
-
-    if(q.length < 2){
-      setResults([], "Type at least 2 letters 🙂");
-      return;
-    }
-
-    setResults([], "Searching…");
-
+    metaLeft.textContent = `Loading characters for: ${animeTitle}…`;
+    setCharacterResults(animeTitle, []);
     try{
-      // Try Characters first
-      let chars = await fetchCharacters(q);
-
-      // If characters empty OR weak match, fallback to anime results too
-      const bestCharScore = chars.length ? Math.max(...chars.map(x => scoreMatch(q, x.title))) : 0;
-
-      if(chars.length === 0 || bestCharScore < 35){
-        const an = await fetchAnime(q);
-        // Mix both but keep characters on top when present
-        const combined = [...chars, ...an];
-        setResults(combined, combined.length ? "Showing best matches (characters + anime)…" : "No results found.");
-        return;
-      }
-
-      // Rank characters with fuzzy score so typos still show something
-      chars = chars
-        .map(it => ({...it, _s: scoreMatch(q, it.title)}))
-        .sort((a,b) => b._s - a._s);
-
-      setResults(chars, "Showing character matches…");
-    }catch(err){
-      setResults([], "Jikan API rate limit / network issue. Wait 10–15 sec and try again.");
+      const chars = await fetchAnimeCharacters(animeId);
+      setCharacterResults(animeTitle, chars);
+      metaLeft.textContent = chars.length ? "Scroll inside the box to see more ↓" : "No characters returned for this title.";
+    }catch(e){
+      setCharacterResults(animeTitle, []);
+      metaLeft.textContent = "Could not load characters (rate limit / network). Try again in 10–15 sec.";
     }
+  }
+
+  // Clicking suggestion -> load characters
+  suggestBox.addEventListener('click', (e) => {
+    const item = e.target.closest('.sItem');
+    if(!item) return;
+    const id = item.getAttribute('data-id');
+    const title = item.getAttribute('data-title');
+    loadCharacters(id, title);
+  });
+
+  // Search button: if suggestion list open, just show it. Otherwise do suggest.
+  async function doSearch(){
+    suggestBox.classList.remove('open');
+    await doSuggest();
   }
 
   qInput.addEventListener('input', () => {
     clearTimeout(typingTimer);
-    typingTimer = setTimeout(doSuggest, 280);
+    typingTimer = setTimeout(doSuggest, 260);
   });
 
   qInput.addEventListener('keydown', (e) => {
@@ -559,7 +468,7 @@
 
   goBtn.addEventListener('click', doSearch);
 
-  // Close suggestions on outside tap
+  // Close suggestions if you tap outside
   document.addEventListener('click', (e) => {
     if(!e.target.closest('.search')) suggestBox.classList.remove('open');
   });
