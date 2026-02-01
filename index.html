@@ -12,8 +12,6 @@
       --text:#1b1b1b; --muted:#666;
       --shadow: 0 18px 45px rgba(0,0,0,.12);
       --radius:18px;
-
-      /* Safe zones so stickers never overlap logo/search/results */
       --safeTop: 90px;
       --safeBottom: 90px;
     }
@@ -76,13 +74,12 @@
       padding: 16px;
     }
 
-    /* LOGO always visible */
     .brand{
       position:absolute;
       left:50%;
       top: 14px;
       transform: translateX(-50%);
-      z-index: 30; /* above stickers */
+      z-index: 30;
       text-align:center;
       user-select:none;
       pointer-events:none;
@@ -100,7 +97,6 @@
       letter-spacing: .4px;
     }
 
-    /* Center search card */
     .center{
       position:absolute;
       left:50%;
@@ -112,7 +108,7 @@
       border-radius: 18px;
       box-shadow: 0 18px 45px rgba(0,0,0,.12);
       padding: 16px;
-      z-index: 20; /* above stickers */
+      z-index: 20;
     }
 
     .searchRow{display:flex; gap:12px; align-items:center;}
@@ -142,7 +138,6 @@
       white-space:nowrap;
     }
 
-    /* Suggestions (ANIME TITLES) */
     .suggest{
       position:absolute;
       top: 48px;
@@ -182,14 +177,13 @@
       gap:10px;
     }
 
-    /* Results (CHARACTERS ONLY) */
     .results{
       margin-top: 12px;
       border-radius: 14px;
       background: rgba(255,255,255,.95);
       border:1px solid rgba(0,0,0,.08);
       max-height: 290px;
-      overflow:auto;               /* ✅ scrollbar */
+      overflow:auto;
       -webkit-overflow-scrolling: touch;
     }
     .rHead{
@@ -204,13 +198,19 @@
       background: rgba(255,255,255,.98);
       z-index:2;
     }
+
+    /* ✅ clickable rows */
     .rItem{
       display:flex;
       gap:10px;
       padding: 10px 12px;
       border-bottom:1px solid rgba(0,0,0,.06);
       align-items:center;
+      cursor:pointer;
+      user-select:none;
     }
+    .rItem:hover{background: rgba(0,0,0,.03)}
+    .rItem:active{transform: scale(.995)}
     .rItem:last-child{border-bottom:none}
     .thumb{
       width:42px;height:42px;border-radius:10px;
@@ -229,7 +229,6 @@
       color:#333;
     }
 
-    /* Stickers never on top of center/brand */
     .sticker{
       position:absolute;
       width:72px; height:72px;
@@ -237,16 +236,74 @@
       filter: drop-shadow(0 10px 12px rgba(0,0,0,.15));
       opacity:.96;
       pointer-events:none;
-      z-index: 5; /* below UI */
+      z-index: 5;
     }
-
-    /* Positions (outside safe center area) */
     .s1{left:18px; top: calc(var(--safeTop) + 40px);}
     .s2{right:18px; top: calc(var(--safeTop) + 40px);}
     .s3{left:34px; bottom: calc(var(--safeBottom) + 16px);}
     .s4{right:34px; bottom: calc(var(--safeBottom) + 16px);}
     .s5{left:110px; top: calc(var(--safeTop) + 170px);}
     .s6{right:110px; top: calc(var(--safeTop) + 170px);}
+
+    /* ✅ POPUP MODAL */
+    .modal{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 999;
+    }
+    .modal.open{display:flex}
+    .modalCard{
+      width:min(520px, 94vw);
+      background: rgba(255,255,255,.97);
+      border:1px solid rgba(0,0,0,.10);
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.25);
+      overflow:hidden;
+    }
+    .modalTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px 14px;
+      background: rgba(0,0,0,.05);
+      border-bottom:1px solid rgba(0,0,0,.08);
+    }
+    .modalTop b{font-size:14px}
+    .xBtn{
+      border:none;
+      background: rgba(0,0,0,.06);
+      padding: 8px 10px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight:900;
+    }
+    .modalBody{
+      padding: 14px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+    .bigImg{
+      width:92px; height:92px;
+      border-radius: 16px;
+      object-fit:cover;
+      background:#eee;
+      flex:0 0 auto;
+    }
+    .mName{font-size:18px; font-weight:950; margin:0}
+    .mLine{margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.35}
+    .mLink{
+      display:inline-block;
+      margin-top:10px;
+      font-weight:800;
+      text-decoration: underline;
+      color:#111;
+      font-size:13px;
+    }
 
     @media (max-width: 520px){
       .window{height:min(660px, 86vh);}
@@ -272,13 +329,12 @@
 
       <div class="stage">
 
-        <!-- Brand -->
         <div class="brand">
           <div class="logo">ANIMDESK</div>
           <div class="by">by sparsh</div>
         </div>
 
-        <!-- Stickers (make sure these exact names exist in your repo folder) -->
+        <!-- Stickers -->
         <img class="sticker s1" src="a3.png" alt="">
         <img class="sticker s2" src="a7.jpeg" alt="">
         <img class="sticker s3" src="a6.png" alt="">
@@ -286,7 +342,6 @@
         <img class="sticker s5" src="a11.jpeg" alt="">
         <img class="sticker s6" src="a4.png" alt="">
 
-        <!-- Center search -->
         <div class="center">
           <div class="searchRow">
             <div class="search">
@@ -299,7 +354,7 @@
 
           <div class="meta">
             <div id="metaLeft">Type 2+ letters…</div>
-            <div id="metaRight">Step 1: pick anime → Step 2: see characters</div>
+            <div id="metaRight">Pick anime → see characters → tap character for info</div>
           </div>
 
           <div class="results" id="results">
@@ -315,6 +370,25 @@
     </div>
   </div>
 
+  <!-- ✅ popup -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modalCard" role="dialog" aria-modal="true">
+      <div class="modalTop">
+        <b>Character info</b>
+        <button class="xBtn" id="xBtn">✕</button>
+      </div>
+      <div class="modalBody">
+        <img id="mImg" class="bigImg" src="" alt="">
+        <div>
+          <p class="mName" id="mName">—</p>
+          <p class="mLine" id="mRole">—</p>
+          <p class="mLine" id="mAnime">—</p>
+          <a class="mLink" id="mLink" href="#" target="_blank" rel="noreferrer">Search on Google →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <script>
   const qInput = document.getElementById('q');
   const goBtn = document.getElementById('goBtn');
@@ -324,7 +398,15 @@
   const metaLeft = document.getElementById('metaLeft');
   const rTitle = document.getElementById('rTitle');
 
-  // quick typo fixes (helps exactly your "jujitsu" case)
+  // popup elements
+  const modal = document.getElementById('modal');
+  const xBtn = document.getElementById('xBtn');
+  const mImg = document.getElementById('mImg');
+  const mName = document.getElementById('mName');
+  const mRole = document.getElementById('mRole');
+  const mAnime = document.getElementById('mAnime');
+  const mLink = document.getElementById('mLink');
+
   const aliasFix = [
     [/\bjujitsu\b/gi, "jujutsu"],
     [/\bkaysen\b/gi, "kaisen"],
@@ -335,7 +417,6 @@
     aliasFix.forEach(([re,rep]) => out = out.replace(re, rep));
     return out.trim();
   }
-
   function esc(s){ return (s||"").toString().replace(/[&<>"']/g, m => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   }[m])); }
@@ -358,7 +439,32 @@
     suggestBox.classList.add('open');
   }
 
+  // ✅ open modal with info
+  function showCharacterModal(charName, role, animeTitle, img){
+    mName.textContent = charName || "Unknown";
+    mRole.textContent = `Role: ${role || "Character"}`;
+    mAnime.textContent = `Anime: ${animeTitle || "-"}`;
+    mImg.src = img || "";
+    mImg.style.display = img ? "block" : "none";
+
+    const q = `${charName} ${animeTitle} character`;
+    mLink.href = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+  function closeModal(){
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  xBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
+
+  let currentAnimeTitle = "";
+
   function setCharacterResults(animeTitle, chars){
+    currentAnimeTitle = animeTitle || "";
     rTitle.textContent = animeTitle ? `Characters — ${animeTitle}` : "Characters";
     list.innerHTML = "";
     count.textContent = chars.length;
@@ -372,13 +478,18 @@
           <div class="rTitle">${esc(c.name)}</div>
           <div class="rSub">${esc(c.role || "Character")}</div>
         </div>
-        <div class="badge">Character</div>
+        <div class="badge">Tap</div>
       `;
+
+      // ✅ click to open popup
+      div.addEventListener('click', () => {
+        showCharacterModal(c.name, c.role, currentAnimeTitle, c.image);
+      });
+
       list.appendChild(div);
     });
   }
 
-  // Step 1: Search ANIME titles (for suggestions)
   async function fetchAnimeTitles(q){
     const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=8&order_by=popularity&sort=asc`;
     const r = await fetch(url);
@@ -392,13 +503,12 @@
     }));
   }
 
-  // Step 2: Once anime picked → fetch CHARACTERS of that anime
   async function fetchAnimeCharacters(animeId){
     const url = `https://api.jikan.moe/v4/anime/${animeId}/characters`;
     const r = await fetch(url);
     const j = await r.json();
     const data = (j && j.data) ? j.data : [];
-    return data.slice(0, 60).map(x => ({
+    return data.slice(0, 80).map(x => ({
       name: x.character?.name || "Unknown",
       role: x.role || "Character",
       image: x.character?.images?.jpg?.image_url || ""
@@ -435,14 +545,13 @@
     try{
       const chars = await fetchAnimeCharacters(animeId);
       setCharacterResults(animeTitle, chars);
-      metaLeft.textContent = chars.length ? "Scroll inside the box to see more ↓" : "No characters returned for this title.";
+      metaLeft.textContent = chars.length ? "Tap a character for info • scroll inside box ↓" : "No characters returned for this title.";
     }catch(e){
       setCharacterResults(animeTitle, []);
       metaLeft.textContent = "Could not load characters (rate limit / network). Try again in 10–15 sec.";
     }
   }
 
-  // Clicking suggestion -> load characters
   suggestBox.addEventListener('click', (e) => {
     const item = e.target.closest('.sItem');
     if(!item) return;
@@ -451,7 +560,6 @@
     loadCharacters(id, title);
   });
 
-  // Search button: if suggestion list open, just show it. Otherwise do suggest.
   async function doSearch(){
     suggestBox.classList.remove('open');
     await doSuggest();
@@ -468,7 +576,6 @@
 
   goBtn.addEventListener('click', doSearch);
 
-  // Close suggestions if you tap outside
   document.addEventListener('click', (e) => {
     if(!e.target.closest('.search')) suggestBox.classList.remove('open');
   });
