@@ -1,487 +1,568 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AnimDesk</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Animdesk</title>
 
   <style>
     :root{
-      --sky:#bfefff;
-      --sky2:#e9fbff;
-      --sea:#97d8ff;
-      --ink:#23313a;
-      --glass: rgba(255,255,255,.62);
-      --glass2: rgba(255,255,255,.22);
-      --shadow: 0 18px 50px rgba(0,0,0,.18);
-      --shadow2: 0 10px 25px rgba(0,0,0,.14);
+      --bg1:#d7f2ff;
+      --bg2:#bfe8ff;
+      --card:#ffffffcc;
+      --glass:#ffffffb8;
+      --text:#1b1b1b;
+      --muted:#666;
+      --shadow: 0 18px 45px rgba(0,0,0,.12);
+      --radius:18px;
+
+      /* Safe zones so stickers never overlap UI */
+      --safeTop: 130px;     /* logo area */
+      --safeMid: 210px;     /* search+results area height */
+      --safeBottom: 110px;  /* bottom padding */
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink)}
     body{
-      overflow:hidden;
-      background:
-        radial-gradient(1200px 500px at 50% 0%, var(--sky2), transparent 60%),
-        linear-gradient(180deg, var(--sky), var(--sea));
+      margin:0;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+      overflow-x:hidden;
     }
 
-    .wrap{height:100%; padding:22px;}
-    .frame{
-      height:100%;
-      border-radius:26px;
-      background: linear-gradient(180deg, rgba(255,255,255,.66), rgba(255,255,255,.22));
-      border: 6px solid rgba(0,140,255,.22);
+    /* Subtle pattern */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background-image:
+        radial-gradient(rgba(255,255,255,.35) 1px, transparent 1px);
+      background-size: 34px 34px;
+      opacity:.18;
+      pointer-events:none;
+    }
+
+    .wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 32px 18px;
+      position:relative;
+    }
+
+    /* Desktop-ish window */
+    .window{
+      width:min(980px, 96vw);
+      height:min(560px, 82vh);
+      background: var(--card);
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 20px;
       box-shadow: var(--shadow);
       position:relative;
       overflow:hidden;
-    }
-
-    .window{
-      position:absolute;
-      left:50%; top:50%;
-      transform:translate(-50%,-50%);
-      width:min(900px, calc(100% - 44px));
-      border-radius:22px;
-      background: rgba(255,255,255,.92);
-      box-shadow: var(--shadow2);
-      overflow:hidden;
-      border: 1px solid rgba(0,0,0,.08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     .titlebar{
-      height:46px;
+      height:44px;
       display:flex;
       align-items:center;
+      gap:10px;
       padding:0 14px;
-      background: rgba(0,0,0,.08);
-      backdrop-filter: blur(6px);
+      background: rgba(0,0,0,.06);
+      border-bottom:1px solid rgba(0,0,0,.08);
     }
-
-    .dots{display:flex; gap:8px; margin-right:12px;}
-    .dot{width:10px;height:10px;border-radius:50%;}
+    .dots{display:flex; gap:7px}
+    .dot{width:10px;height:10px;border-radius:50%}
     .dot.red{background:#ff5f57}
     .dot.yellow{background:#febc2e}
     .dot.green{background:#28c840}
-    .tab{font-size:13px;color:rgba(0,0,0,.65);font-weight:650;}
+    .tabname{
+      font-size:14px;
+      color:#333;
+      opacity:.8;
+      margin-left:6px;
+    }
 
-    .content{
-      padding:34px 24px 18px;
-      min-height: 430px;
+    .stage{
+      position:relative;
+      height: calc(100% - 44px);
+      padding: 18px;
+    }
+
+    /* Logo splash */
+    .splash{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(255,255,255,.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index:20;
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    .splash.hidden{
+      opacity:0;
+      transform: scale(.98);
+      pointer-events:none;
+    }
+    .logoBox{
       display:flex;
       flex-direction:column;
       align-items:center;
-      justify-content:flex-start;
-      gap:14px;
-      position:relative;
-    }
-
-    /* splash */
-    .splash{
-      position:absolute; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      flex-direction:column; gap:10px;
-      background: rgba(255,255,255,.92);
-      z-index: 5;
-      transition: opacity .35s ease, transform .35s ease;
-    }
-    .splash.hide{opacity:0; transform: scale(1.02); pointer-events:none;}
-    .logo{
-      font-size:56px;
-      line-height:1;
-      letter-spacing:-1.2px;
-      font-weight:900;
-      color: #ff9b00;
+      gap:8px;
+      user-select:none;
       cursor:pointer;
-      user-select:none;
-      transform-origin:center;
-    }
-    .logo.pop{animation: pop .55s ease both;}
-    @keyframes pop{ 0%{transform:scale(1)} 40%{transform:scale(1.08)} 100%{transform:scale(.98)} }
-    .sub{font-size:14px;color:rgba(0,0,0,.55);}
-    .by{position:absolute; bottom:14px;font-size:12px;color:rgba(0,0,0,.55);}
-    .by b{color:rgba(0,0,0,.75)}
-
-    /* stickers */
-    .sticker{
-      position:absolute;
-      width:86px; height:86px;
-      border-radius: 20px;
-      background: rgba(255,255,255,.55);
-      border: 1px solid rgba(0,0,0,.07);
-      box-shadow: 0 10px 18px rgba(0,0,0,.10);
-      display:flex; align-items:center; justify-content:center;
-      user-select:none;
-      animation: floaty 6s ease-in-out infinite;
-      backdrop-filter: blur(6px);
-      overflow:hidden;
-    }
-    .sticker img{
-      width:100%;
-      height:100%;
-      object-fit: contain;
-      padding: 8px;
-      filter: drop-shadow(0 6px 10px rgba(0,0,0,.10));
-    }
-    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-    .s1{left:18px; top:84px; animation-delay:.0s}
-    .s2{right:18px; top:84px; animation-delay:.8s}
-    .s3{left:30px; bottom:86px; animation-delay:1.2s}
-    .s4{right:28px; bottom:86px; animation-delay:.4s}
-    .s5{left:50%; top:56px; transform:translateX(-50%); animation-delay:1.6s}
-
-    /* search */
-    .searchWrap{width:min(560px, 94%); position:relative; margin-top:12px;}
-    .search{
-      width:100%;
-      padding:16px 18px;
+      padding: 18px 20px;
       border-radius: 18px;
-      border: 1px solid rgba(0,0,0,.10);
-      background: linear-gradient(180deg, var(--glass), var(--glass2));
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 20px rgba(0,0,0,.08);
-      font-size:16px;
-      outline:none;
-      color: var(--ink);
+      background: rgba(255,255,255,.75);
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow: 0 14px 35px rgba(0,0,0,.14);
     }
-    .metaRow{
-      margin-top:8px;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      font-size:13px;
-      color:rgba(0,0,0,.55);
-      width:100%;
+    .logo{
+      font-weight: 900;
+      letter-spacing: 2px;
+      font-size: 44px;
+      line-height:1;
+    }
+    .by{
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: .5px;
+    }
+    .tap{
+      font-size: 12px;
+      color: var(--muted);
+      opacity:.9;
+      margin-top:4px;
     }
 
-    /* suggestions */
-    .suggest{
+    /* Main center card */
+    .center{
       position:absolute;
-      left:0; right:0;
-      top:56px;
-      background: rgba(255,255,255,.98);
-      border: 1px solid rgba(0,0,0,.08);
-      border-radius:16px;
-      overflow:hidden;
-      box-shadow: 0 16px 35px rgba(0,0,0,.14);
-      display:none;
-      z-index: 3;
-
-      /* ✅ scrollable list */
-      max-height: 52vh;
-      overflow-y:auto;
-      -webkit-overflow-scrolling: touch;
+      left:50%;
+      top: 54%;
+      transform: translate(-50%,-50%);
+      width:min(720px, 92%);
+      background: var(--glass);
+      border:1px solid rgba(0,0,0,.08);
+      border-radius: 18px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.12);
+      padding: 16px;
+      z-index:10;
     }
-    .suggest.show{display:block}
-    .suggest button{
-      width:100%;
-      text-align:left;
-      padding:12px 14px;
-      border:0;
-      background:transparent;
-      cursor:pointer;
+
+    .searchRow{
       display:flex;
       gap:12px;
       align-items:center;
     }
-    .suggest button:hover{background: rgba(0,0,0,.04);}
 
-    .thumb{
-      width:52px;height:52px;border-radius:14px;
-      background: rgba(0,0,0,.06);
-      overflow:hidden; flex:0 0 auto;
-      border:1px solid rgba(0,0,0,.06);
+    .search{
+      flex:1;
+      position:relative;
     }
-    .thumb img{width:100%;height:100%;object-fit:cover}
+    input{
+      width:100%;
+      padding: 13px 14px 13px 42px;
+      border-radius: 14px;
+      border:1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.9);
+      outline:none;
+      font-size:15px;
+    }
+    .icon{
+      position:absolute;
+      left:12px;
+      top:50%;
+      transform: translateY(-50%);
+      opacity:.7;
+      font-size:16px;
+    }
+    .btn{
+      padding: 12px 14px;
+      border-radius: 14px;
+      border:1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.9);
+      cursor:pointer;
+      font-weight:650;
+      font-size:14px;
+    }
 
-    .sText{display:flex;flex-direction:column;gap:2px; min-width:0;}
-    .sTitle{
-      font-size:14.5px;
-      font-weight:900;
-      color:rgba(0,0,0,.82);
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .sSub{font-size:12.5px;color:rgba(0,0,0,.55);display:flex;gap:8px;flex-wrap:wrap;}
-
-    /* result card */
-    .result{
-      width:min(720px, 94%);
-      margin-top: 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(0,0,0,.08);
-      background: rgba(255,255,255,.92);
-      box-shadow: 0 12px 26px rgba(0,0,0,.12);
-      padding: 14px 16px;
-      display:none;
-    }
-    .result.show{display:block}
-    .rRow{display:flex;gap:14px;align-items:flex-start;}
-    .poster{
-      width:92px; height:92px;
-      border-radius:16px;
+    /* Dropdown suggestions */
+    .suggest{
+      position:absolute;
+      top: 48px;
+      left:0; right:0;
+      background: rgba(255,255,255,.98);
+      border:1px solid rgba(0,0,0,.10);
+      border-radius: 14px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.12);
       overflow:hidden;
-      background: rgba(0,0,0,.06);
-      border: 1px solid rgba(0,0,0,.06);
+      display:none;
+      z-index: 50;
+      max-height: 220px;
+    }
+    .suggest.open{display:block}
+    .sItem{
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+      cursor:pointer;
+      font-size:14px;
+    }
+    .sItem:last-child{border-bottom:none}
+    .sItem:hover{background: rgba(0,0,0,.04)}
+    .sSmall{font-size:12px;color:var(--muted);margin-top:2px}
+
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* Scrollable results */
+    .results{
+      margin-top: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.9);
+      border:1px solid rgba(0,0,0,.08);
+      max-height: 280px;
+      overflow:auto;             /* ✅ scrollbar */
+      -webkit-overflow-scrolling: touch;
+    }
+    .rHead{
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--muted);
+      border-bottom:1px solid rgba(0,0,0,.06);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .rItem{
+      display:flex;
+      gap:10px;
+      padding: 10px 12px;
+      border-bottom:1px solid rgba(0,0,0,.06);
+      align-items:center;
+    }
+    .rItem:last-child{border-bottom:none}
+    .thumb{
+      width:42px;height:42px;border-radius:10px;
+      object-fit:cover;
+      background:#eee;
       flex:0 0 auto;
     }
-    .poster img{width:100%;height:100%;object-fit:cover}
-    .rBody{min-width:0}
-    .resultTitle{font-weight:950;margin:0 0 6px;}
-    .resultText{margin:0;color:rgba(0,0,0,.68);line-height:1.5;font-size:14px;}
-    .rLinks{margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;}
-    .btn{
-      display:inline-block;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(0,0,0,.10);
-      background: rgba(255,255,255,.85);
-      color: rgba(0,0,0,.78);
-      text-decoration:none;
-      font-weight:900;
-      font-size:13px;
+    .rTitle{
+      font-weight:750;
+      font-size:14px;
+      line-height:1.2;
     }
-    .btn.primary{background: rgba(255,155,0,.16);border-color: rgba(255,155,0,.30);color:#7a4700;}
+    .rSub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+      line-height:1.2;
+    }
+    .badge{
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      background: rgba(0,0,0,.06);
+      margin-left:auto;
+      flex:0 0 auto;
+      color:#333;
+    }
 
-    @media (max-width:520px){
-      .logo{font-size:44px}
-      .sticker{width:70px;height:70px}
-      .titlebar{height:42px}
-      .content{padding:28px 16px 18px}
+    /* Stickers (never in center) */
+    .sticker{
+      position:absolute;
+      width:72px;
+      height:72px;
+      object-fit:contain;
+      filter: drop-shadow(0 10px 12px rgba(0,0,0,.15));
+      opacity:.96;
+      pointer-events:none;
+      z-index:5;
+    }
+
+    /* Place stickers around safe zones */
+    .s1{left:22px; top: calc(var(--safeTop) + 40px);}
+    .s2{right:22px; top: calc(var(--safeTop) + 40px);}
+    .s3{left:40px; bottom: calc(var(--safeBottom) + 18px);}
+    .s4{right:40px; bottom: calc(var(--safeBottom) + 18px);}
+    .s5{left:110px; top: calc(var(--safeTop) + 160px);}
+    .s6{right:110px; top: calc(var(--safeTop) + 160px);}
+
+    /* Small screens: reduce sticker size */
+    @media (max-width: 520px){
+      .window{height:min(640px, 86vh);}
+      .sticker{width:58px;height:58px}
+      .center{top: 58%}
+      .results{max-height: 320px}
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="frame">
-
-      <div class="window">
-        <div class="titlebar">
-          <div class="dots">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-          </div>
-          <div class="tab">home</div>
+    <div class="window" aria-label="Animdesk window">
+      <div class="titlebar">
+        <div class="dots">
+          <div class="dot red"></div>
+          <div class="dot yellow"></div>
+          <div class="dot green"></div>
         </div>
-
-        <div class="content">
-          <!-- ✅ Stickers: CHANGE these filenames to match EXACTLY your files -->
-          <div class="sticker s1"><img src="a3.png"  alt="sticker" onerror="this.style.display='none'"></div>
-          <div class="sticker s2"><img src="a7.jpeg" alt="sticker" onerror="this.style.display='none'"></div>
-          <div class="sticker s3"><img src="a6.png"  alt="sticker" onerror="this.style.display='none'"></div>
-          <div class="sticker s4"><img src="a9.jpeg" alt="sticker" onerror="this.style.display='none'"></div>
-          <div class="sticker s5"><img src="a12.jpeg" alt="sticker" onerror="this.style.display='none'"></div>
-
-          <div class="splash" id="splash">
-            <div class="logo" id="logo">AnimDesk</div>
-            <div class="sub">click the logo to enter ✨</div>
-            <div class="by">AnimDesk <b>by Sparsh</b></div>
-          </div>
-
-          <div class="searchWrap">
-            <input class="search" id="search"
-              placeholder="Search anime characters… (Doraemon, Pikachu, Nobita)"
-              autocomplete="off"
-              disabled
-            />
-            <div class="suggest" id="suggest"></div>
-
-            <div class="metaRow">
-              <div id="status">Ready.</div>
-              <div>Data: Jikan Characters</div>
-            </div>
-          </div>
-
-          <div class="result" id="result">
-            <div class="rRow">
-              <div class="poster" id="poster"></div>
-              <div class="rBody">
-                <p class="resultTitle" id="resultTitle">Result</p>
-                <p class="resultText" id="resultText"></p>
-                <div class="rLinks" id="rLinks"></div>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        <div class="tabname">home</div>
       </div>
 
+      <div class="stage">
+
+        <!-- Stickers: update filenames to your real ones -->
+        <img class="sticker s1" src="a3.png" alt="">
+        <img class="sticker s2" src="a7.jpeg" alt="">
+        <img class="sticker s3" src="a6.png" alt="">
+        <img class="sticker s4" src="a9.jpeg" alt="">
+        <img class="sticker s5" src="a11.jpeg" alt="">
+        <img class="sticker s6" src="a4.png" alt="">
+
+        <!-- Splash logo -->
+        <div class="splash" id="splash">
+          <div class="logoBox" id="logoBtn" title="Tap to start">
+            <div class="logo">ANIMDESK</div>
+            <div class="by">by sparsh</div>
+            <div class="tap">tap to open ✨</div>
+          </div>
+        </div>
+
+        <!-- Main card -->
+        <div class="center" aria-label="Search panel">
+          <div class="searchRow">
+            <div class="search">
+              <div class="icon">🔎</div>
+              <input id="q" type="text" placeholder="Search anime character… (ex: Doraemon, Naruto, Gojo)" autocomplete="off" />
+              <div class="suggest" id="suggest"></div>
+            </div>
+            <button class="btn" id="goBtn">Search</button>
+          </div>
+
+          <div class="meta">
+            <div id="metaLeft">Type 2+ letters…</div>
+            <div id="metaRight">Data: Jikan API</div>
+          </div>
+
+          <div class="results" id="results" aria-label="Results">
+            <div class="rHead">
+              <span>Results</span>
+              <span id="count">0</span>
+            </div>
+            <div id="list"></div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
-  <script>
-    // ✅ Character Search API:
-    // https://api.jikan.moe/v4/characters?q=QUERY&limit=10
+<script>
+  // ---------- UI: splash ----------
+  const splash = document.getElementById('splash');
+  const logoBtn = document.getElementById('logoBtn');
+  logoBtn.addEventListener('click', () => splash.classList.add('hidden'));
 
-    const splash = document.getElementById('splash');
-    const logo = document.getElementById('logo');
-    const search = document.getElementById('search');
-    const suggest = document.getElementById('suggest');
-    const result = document.getElementById('result');
-    const resultTitle = document.getElementById('resultTitle');
-    const resultText = document.getElementById('resultText');
-    const statusEl = document.getElementById('status');
-    const poster = document.getElementById('poster');
-    const rLinks = document.getElementById('rLinks');
+  // ---------- Helpers ----------
+  const $ = (id) => document.getElementById(id);
 
-    let lastResults = [];
-    let debounceTimer = null;
-    let aborter = null;
+  function esc(s){ return (s||"").toString().replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m])); }
 
-    function enterAnimDesk(){
-      logo.classList.add('pop');
-      setTimeout(() => {
-        splash.classList.add('hide');
-        search.disabled = false;
-        search.focus();
-      }, 420);
+  // Simple fuzzy score (typo tolerance)
+  function scoreMatch(query, text){
+    query = query.toLowerCase();
+    text = (text||"").toLowerCase();
+    if(!query || !text) return 0;
+    if(text.includes(query)) return 100 - (text.indexOf(query)); // strong
+    // subsequence score
+    let qi=0, ti=0, hits=0;
+    while(qi<query.length && ti<text.length){
+      if(query[qi]===text[ti]){ hits++; qi++; }
+      ti++;
     }
-    logo.addEventListener('click', enterAnimDesk);
-    setTimeout(() => { if(!splash.classList.contains('hide')) enterAnimDesk(); }, 1200);
+    return Math.round((hits / query.length) * 60); // up to 60
+  }
 
-    function setStatus(msg){ statusEl.textContent = msg; }
+  // ---------- Rendering ----------
+  const list = $('list');
+  const count = $('count');
+  const metaLeft = $('metaLeft');
 
-    function showResult(item){
-      const name = item.name || "Character";
-      const about = (item.about || "").replace(/<[^>]*>/g,"").trim();
+  function setResults(items, label){
+    list.innerHTML = "";
+    count.textContent = items.length;
+    metaLeft.textContent = label || (items.length ? "Showing matches…" : "No results. Try another name.");
+    items.forEach(it => {
+      const div = document.createElement('div');
+      div.className = 'rItem';
+      const img = it.image || "";
+      div.innerHTML = `
+        <img class="thumb" src="${esc(img)}" alt="" onerror="this.style.display='none'">
+        <div>
+          <div class="rTitle">${esc(it.title)}</div>
+          <div class="rSub">${esc(it.sub || "")}</div>
+        </div>
+        <div class="badge">${esc(it.type)}</div>
+      `;
+      list.appendChild(div);
+    });
+  }
 
-      resultTitle.textContent = name;
-      resultText.textContent = about ? (about.length > 260 ? about.slice(0,260).trim()+"…" : about)
-                                    : "No description found. Try another character.";
+  // ---------- API (Jikan) ----------
+  // 1) Characters search
+  async function fetchCharacters(q){
+    const url = `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(q)}&limit=10&order_by=favorites&sort=desc`;
+    const r = await fetch(url);
+    const j = await r.json();
+    const data = (j && j.data) ? j.data : [];
+    return data.map(c => ({
+      type: "Character",
+      title: c.name,
+      sub: (c.about ? c.about.slice(0, 90).replace(/\s+/g,' ').trim() + "…" : "Popular character"),
+      image: c.images?.jpg?.image_url || ""
+    }));
+  }
 
-      // image
-      poster.innerHTML = "";
-      const imgUrl = item.images?.jpg?.image_url || "";
-      if(imgUrl){
-        const img = document.createElement('img');
-        img.src = imgUrl;
-        img.alt = name;
-        poster.appendChild(img);
-      }
+  // 2) Fallback: Anime search (helps when user searches anime title like "Jujutsu Kaisen")
+  async function fetchAnime(q){
+    const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=10&order_by=score&sort=desc`;
+    const r = await fetch(url);
+    const j = await r.json();
+    const data = (j && j.data) ? j.data : [];
+    return data.map(a => ({
+      type: "Anime",
+      title: a.title,
+      sub: `Score: ${a.score ?? "NA"} • ${a.type ?? ""}`,
+      image: a.images?.jpg?.image_url || ""
+    }));
+  }
 
-      // links
-      rLinks.innerHTML = "";
-      if(item.url){
-        const a = document.createElement('a');
-        a.className = "btn primary";
-        a.href = item.url;
-        a.target = "_blank";
-        a.rel = "noopener";
-        a.textContent = "Open on MyAnimeList →";
-        rLinks.appendChild(a);
-      }
+  // Suggestions: use characters first, fuzzy filter
+  const suggestBox = $('suggest');
+  let lastSuggest = [];
 
-      const b = document.createElement('a');
-      b.className = "btn";
-      b.href = "#";
-      b.textContent = "Clear";
-      b.addEventListener('click', (e) => {
-        e.preventDefault();
-        result.classList.remove('show');
-        search.value = "";
-        suggest.classList.remove('show');
-        setStatus("Ready.");
-        search.focus();
-      });
-      rLinks.appendChild(b);
+  function openSuggest(items){
+    if(!items.length){
+      suggestBox.classList.remove('open');
+      suggestBox.innerHTML = "";
+      return;
+    }
+    suggestBox.innerHTML = items.map(x => `
+      <div class="sItem" data-val="${esc(x.title)}">
+        <div><b>${esc(x.title)}</b></div>
+        <div class="sSmall">${esc(x.type)} • ${esc(x.sub||"")}</div>
+      </div>
+    `).join("");
+    suggestBox.classList.add('open');
+  }
 
-      result.classList.add('show');
+  suggestBox.addEventListener('click', (e) => {
+    const item = e.target.closest('.sItem');
+    if(!item) return;
+    $('q').value = item.getAttribute('data-val');
+    suggestBox.classList.remove('open');
+    doSearch();
+  });
+
+  // ---------- Search flow ----------
+  const qInput = $('q');
+  const goBtn = $('goBtn');
+
+  let typingTimer = null;
+
+  async function doSuggest(){
+    const q = qInput.value.trim();
+    if(q.length < 2){
+      openSuggest([]);
+      metaLeft.textContent = "Type 2+ letters…";
+      return;
     }
 
-    function renderSuggestions(items){
-      suggest.innerHTML = "";
-      if(!items || items.length === 0){
-        suggest.classList.remove('show');
+    try{
+      const chars = await fetchCharacters(q);
+      // Fuzzy rank inside returned list
+      const ranked = chars
+        .map(it => ({...it, _s: scoreMatch(q, it.title)}))
+        .sort((a,b) => b._s - a._s)
+        .slice(0,6);
+
+      lastSuggest = ranked;
+      openSuggest(ranked);
+      metaLeft.textContent = "Suggestions ready…";
+    }catch(err){
+      openSuggest([]);
+      metaLeft.textContent = "API busy… try again in a few seconds.";
+    }
+  }
+
+  async function doSearch(){
+    const q = qInput.value.trim();
+    suggestBox.classList.remove('open');
+
+    if(q.length < 2){
+      setResults([], "Type at least 2 letters 🙂");
+      return;
+    }
+
+    setResults([], "Searching…");
+
+    try{
+      // Try Characters first
+      let chars = await fetchCharacters(q);
+
+      // If characters empty OR weak match, fallback to anime results too
+      const bestCharScore = chars.length ? Math.max(...chars.map(x => scoreMatch(q, x.title))) : 0;
+
+      if(chars.length === 0 || bestCharScore < 35){
+        const an = await fetchAnime(q);
+        // Mix both but keep characters on top when present
+        const combined = [...chars, ...an];
+        setResults(combined, combined.length ? "Showing best matches (characters + anime)…" : "No results found.");
         return;
       }
 
-      items.slice(0,10).forEach((item) => {
-        const btn = document.createElement('button');
-        btn.type = "button";
+      // Rank characters with fuzzy score so typos still show something
+      chars = chars
+        .map(it => ({...it, _s: scoreMatch(q, it.title)}))
+        .sort((a,b) => b._s - a._s);
 
-        const thumbUrl = item.images?.jpg?.image_url || "";
-        const name = item.name || "Character";
-        const nick = (item.name_kanji || item.nicknames?.[0] || "");
-
-        btn.innerHTML = `
-          <div class="thumb">${thumbUrl ? `<img src="${thumbUrl}" alt="">` : ""}</div>
-          <div class="sText">
-            <div class="sTitle">${name}</div>
-            <div class="sSub">${nick ? `<span>${nick}</span>` : `<span>Character</span>`}</div>
-          </div>
-        `;
-
-        btn.addEventListener('click', () => {
-          search.value = name;
-          suggest.classList.remove('show');
-          setStatus("Showing: " + name);
-          showResult(item);
-        });
-
-        suggest.appendChild(btn);
-      });
-
-      suggest.classList.add('show');
+      setResults(chars, "Showing character matches…");
+    }catch(err){
+      setResults([], "Jikan API rate limit / network issue. Wait 10–15 sec and try again.");
     }
+  }
 
-    async function apiSearch(q){
-      if(aborter) aborter.abort();
-      aborter = new AbortController();
+  qInput.addEventListener('input', () => {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(doSuggest, 280);
+  });
 
-      const url = `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(q)}&limit=10`;
+  qInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') doSearch();
+  });
 
-      setStatus("Searching characters…");
-      try{
-        const res = await fetch(url, { signal: aborter.signal });
-        if(!res.ok) throw new Error("API error " + res.status);
-        const data = await res.json();
-        lastResults = data?.data || [];
-        renderSuggestions(lastResults);
-        setStatus(lastResults.length ? "Suggestions ready." : "No characters found.");
-      }catch(err){
-        if(err.name === "AbortError") return;
-        setStatus("Rate limit / error. Try again in a moment.");
-        renderSuggestions([]);
-      }
-    }
+  goBtn.addEventListener('click', doSearch);
 
-    function onInput(){
-      const q = search.value.trim();
-      result.classList.remove('show');
-
-      if(q.length < 2){
-        renderSuggestions([]);
-        setStatus("Type 2+ letters…");
-        return;
-      }
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => apiSearch(q), 320);
-    }
-
-    search.addEventListener('input', onInput);
-
-    search.addEventListener('keydown', (e) => {
-      if(e.key === "Enter"){
-        const q = search.value.trim().toLowerCase();
-        if(!q) return;
-        let pick = lastResults.find(x => (x.name || "").toLowerCase() === q) || lastResults[0];
-        if(pick){
-          suggest.classList.remove('show');
-          setStatus("Showing: " + (pick.name || "Result"));
-          showResult(pick);
-        }else{
-          apiSearch(search.value.trim());
-        }
-      }
-      if(e.key === "Escape"){
-        suggest.classList.remove('show');
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if(!e.target.closest('.searchWrap')) suggest.classList.remove('show');
-    });
-  </script>
+  // Close suggestions on outside tap
+  document.addEventListener('click', (e) => {
+    if(!e.target.closest('.search')) suggestBox.classList.remove('open');
+  });
+</script>
 </body>
 </html>
